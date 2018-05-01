@@ -9,28 +9,34 @@ from keras.layers.merge import Concatenate
 from sklearn.model_selection import GridSearchCV
 from keras.wrappers.scikit_learn import KerasClassifier
 
-# combine low and high expression examples
-high_exp = pd.read_csv("high_exp_one_hot.csv", index_col=0)
-low_exp = pd.read_csv("low_exp_one_hot.csv", index_col=0)
+# read in high and low expression one_hot files
+high_exp = pd.concat(
+    [pd.read_csv(f"high_exp_one_hot_{i}.csv", index_col=0)
+     for i in range(1, 5)]
+)
+low_exp = pd.concat(
+    [pd.read_csv(f"low_exp_one_hot_{i}.csv", index_col=0)
+     for i in range(1, 5)]
+)
+
+# concatenate to form a single dataframe
 data_df = pd.concat([high_exp, low_exp], axis=0)
 
-del high_exp 
-del low_exp
-
-# convert string data from csv to numpy arrays
+# function to convert csv files into 
 def string_to_matrix(string):
+    # convert string to list of one_hot lists
     string = str(string)
     list_of_strings = string.split('], [')
     list_of_lists = [channels.strip().replace('[', '').replace(']', '').replace(',', '').split() 
                      for channels in list_of_strings
                      if 'nan' not in list_of_strings
                     ]
-    
+    # add padding
     remaining_pad = 181 - len(list_of_lists)
     while remaining_pad > 0:
         list_of_lists.append(list([0 for x in range(0, 64)]))
         remaining_pad = remaining_pad - 1
-        
+    # return padded one_hot matrix
     return np.array(list_of_lists).astype(np.float)
 
 data_df['one_hot_matrix'] = data_df['one_hot_matrix'].apply(string_to_matrix)
@@ -45,16 +51,12 @@ for idx, one_hot_matrix in enumerate(data_df['one_hot_matrix'].values):
 
 y = data_df['class'].values
 
-del data_df
-
+# train/test split
 x_train, x_test, y_train, y_test = train_test_split(
     X, y, test_size=0.3, random_state=42)
 
-del X
-del y
 
 # tune hyperparameters for simple model
-
 # define simple model per Yoon Kim (2014)
 def create_model(filter_sizes=3, num_filters=10):
     # prepare input shape
@@ -89,6 +91,7 @@ np.random.seed(seed)
 
 model = KerasClassifier(build_fn=create_model, batch_size=50,
                         epochs=25, verbose=2)
+
 # define the grid search parameters
 # model hyperparameters
 filter_sizes = [(3, 3, 3), (3, 4, 5), (5, 5, 5),
