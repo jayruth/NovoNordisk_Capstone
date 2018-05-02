@@ -1,3 +1,6 @@
+# Specific Large Files
+aa_one_hot_highlow.h5
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
