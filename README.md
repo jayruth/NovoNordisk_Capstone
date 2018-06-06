@@ -23,31 +23,34 @@ Mac OS X and Windows are both able to download python 3 without any dependencies
 
 **Data Collection and Sequence Encoding**
 
-  *Data Collection*
+*Data Collection*
     - Protein expression levels and sequence data are collected from a specified data source.  The primary data source will be the data published in Sastry et. al., but any other source of data containing a metric (e.g. protein expression level, solubility) and a sequence (e.g. nucleotide sequence, amino acid) may be used.
       *Components*
             - Pandas Module
   
-  *Sequence Encoding*
+*Sequence Encoding*
      - Starting with a nucleotide or amino acid sequence generate an encoded sequence that can be fed into a machine learning model.  Encoding styles may include color, one-hot, or another strategy.  Encoded sequences need to be padded so all have the same length.
+      
       *Components*
             - One Hot Encoder
             - Color Encoder
+      
       *Test Cases*
             - Feed in various length sequences and return data that is all the same length
             - Feed in a short sequence and verify the encoding results match what is expected 
+      
       *Padding*
           - Following encoding, sequences will be padded to ensure the batch size is preserved during prediction of classes or training of data
  
 **LSTM-CNN Sequence Embedding and Architecture Training**
 
-   *Sequence Embedding*
+*Sequence Embedding*
           - Starting with the give nucleotide sequence, encoded dictionaries can be created from either the multiples of 3 nucleotides as read from the nucleotide sqeuence or using 64 codons; here, the dictionary will used to create a more dense representation of the provided sequences. Here, embedding length is determined from hyperparameter tuning, optimized from the LSTM-CNN architecture.
     
    *Padding*
           - Following embedding, sequences will be padded to ensure the batch size is preserved during prediction of classes or training of data
    
-   *Data Classification*
+*Data Classification*
           - Sequences are classified into 2 or more classes based on the value of the metric. For example as in Sastry et. al.  protein expression levels are used to classify each sequence into high and low expression groups based on relative cut off levels (e.g. 1st and 4th quartiles).  In the case of Sastry et. al sequences are labeled with a 0 for low/unacceptable expression, 1 for high/acceptable expression, and the middle 2 quartiles are discarded. 
         *Components*
               - Two Class Classifier (eg. high/low)
@@ -55,7 +58,7 @@ Mac OS X and Windows are both able to download python 3 without any dependencies
        *Test Cases*
               - Pass the functions for small dataframes that should have a known number of each class and verify the results are as expected.
 
-   *Protein Property Prediction Model Training*
+*Protein Property Prediction Model Training*
           - Starting with encoded sequence data (nucleotide or amino acid), generate a model that predicts the class of each sequence. 
    *Components*
           - Multiple filter width model
@@ -68,13 +71,13 @@ Mac OS X and Windows are both able to download python 3 without any dependencies
 
 **LSTM-CNN Model Prediction and Interpretation**
 
-   *Protein Property Prediction*
+*Protein Property Prediction*
           - Using the previously trained and saved model feed in new data and make class predictions. 
-  *Components*
+      *Components*
            - Model predict
            - ROC Curves 
            - Test-train accuracy plots
-  *Test Cases*
+      *Test Cases*
            - This will use mostly Keras functions.  Write a simple test to make sure a model can be loaded to make a prediction. 
 
 
