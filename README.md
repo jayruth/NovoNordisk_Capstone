@@ -31,15 +31,15 @@ Mac OS X and Windows are both able to download python 3 without any dependencies
 *Sequence Encoding*
      - Starting with a nucleotide or amino acid sequence generate an encoded sequence that can be fed into a machine learning model.  Encoding styles may include color, one-hot, or another strategy.  Encoded sequences need to be padded so all have the same length.
       
-      *Components*
+   *Components*
             - One Hot Encoder
             - Color Encoder
       
-      *Test Cases*
+   *Test Cases*
             - Feed in various length sequences and return data that is all the same length
             - Feed in a short sequence and verify the encoding results match what is expected 
       
-      *Padding*
+   *Padding*
           - Following encoding, sequences will be padded to ensure the batch size is preserved during prediction of classes or training of data
  
 **LSTM-CNN Sequence Embedding and Architecture Training**
