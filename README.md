@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/jayruth/NovoNordisk_Capstone.svg?branch=master)](https://travis-ci.org/jayruth/NovoNordisk_Capstone)
+
 # NOVO-DNA/AA-Classfication (NDAC): Multiclassification of Protein Characteristics from Nucleotide or Amino Acid Sequences 
 
 This repository contains the source code for our DIRECT capstone project with Novo Nordisk.
