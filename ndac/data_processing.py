@@ -35,3 +35,36 @@ def quantile_classify(metric, sequence, high_cut=0.75, low_cut=0.25):
     
     
     return dataframe, hist
+
+
+def value_classify(metric, sequence, high_value, low_value):
+    """This function creates a new dataframe containing the specified metric and sequence and computes
+    a new column, 'class', based on the high and low values specified for metric"""
+
+    dataframe = pd.concat([metric, sequence], axis=1)
+    
+    
+    
+    #make a histogram of the data to show the locations of the cut points
+    hist = metric.hist(bins=100)
+    plt.axvline(low_value, color='k', linestyle='dashed', linewidth=3)
+    plt.axvline(high_value, color='r', linestyle='dashed', linewidth=3)
+    
+    #function to assign class based on high and low cut
+    def assign_class(metric):
+        if metric <= low_value:
+            return 0
+        elif metric >= high_value:
+            return 1
+        return
+    #apply to the dataframe then remove values not assigned a calss
+    dataframe['class'] = dataframe.iloc[:,0].apply(assign_class)
+    dataframe = dataframe[pd.notnull(dataframe['class'])]
+    
+    counts = pd.value_counts(dataframe['class'])
+    print(len(metric),"samples input.")
+    print(counts[1],"samples above high value,", counts[0], "samples below low value,",
+          len(metric) - len(dataframe), "samples removed.")
+    
+    
+    return dataframe, hist
