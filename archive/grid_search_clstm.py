@@ -18,7 +18,7 @@ from sklearn.model_selection import GridSearchCV
 from keras.wrappers.scikit_learn import KerasClassifier
 
 # read original data from 
-data = pd.read_csv('../dataframes/DF_prest.csv', index_col=0)
+data = pd.read_csv('../../dataframes/DF_prest.csv', index_col=0)
 
 # setup 'docs' for use with Tokenizer
 def nt_seq_doc(nt_sequence):
@@ -81,12 +81,12 @@ X = sequence.pad_sequences(X, maxlen=max_seq_length)
 
 # define simple model per Yoon Kim (2014)
 def create_model(embedding_length=16, num_filters=128, pool_size=2,
-                 lstm_nodes=100, drop=0.5, recurrent_drop=0.2):
+                 lstm_nodes=100, drop=0.5, recurrent_drop=0.5, filter_length=3):
     # create the model
     model = Sequential()
     model.add(Embedding(top_words, embedding_length, 
                         input_length=max_seq_length))
-    model.add(Conv1D(filters=num_filters, kernel_size=3, 
+    model.add(Conv1D(filters=num_filters, kernel_size=filter_length, 
                      padding='same', activation='selu'))
     model.add(MaxPooling1D(pool_size=pool_size))
     model.add(LSTM(lstm_nodes, dropout=drop, 
@@ -99,23 +99,22 @@ def create_model(embedding_length=16, num_filters=128, pool_size=2,
 
 
 model = KerasClassifier(build_fn=create_model, batch_size=64,
-                        epochs=50, verbose=2)
+                        epochs=30, verbose=10)
 # define the grid search parameters
 # model hyperparameters
-#embedding_length = [4, 8, 16]
+embedding_length = [4, 8, 16] #maybe use [3, 6, 9] for AA sequence
 num_filters = [100, 200]
-#filter_length = [2, 3, 4, 5]
+filter_length = [2, 3, 4, 5] #maybe longer? [3, 5, 8]
 pool_size = [3, 4]
 lstm_nodes = [100, 200]
-drop = [0.5, 0.8]
-recurrent_drop = [0.2, 0.5, 0.8]
+# drop = [0.5, 0.8] just do 0.5
+#recurrent_drop = [0.2, 0.5, 0.8]
 
 param_grid = dict(num_filters=num_filters, pool_size=pool_size,
-                  lstm_nodes=lstm_nodes, drop=drop, 
-                  recurrent_drop=recurrent_drop)
+                  lstm_nodes=lstm_nodes, filter_length=filter_length)
 
 grid = GridSearchCV(estimator=model, param_grid=param_grid,
-                    cv=5, n_jobs=28)
+                    cv=3)#, n_jobs=28)
 grid_result = grid.fit(X, y)
 # summarize results
 print("Best: %f using %s" % (grid_result.best_score_, grid_result.best_params_))
@@ -125,4 +124,4 @@ grid_df['means'] = grid_result.cv_results_['mean_test_score']
 grid_df['stddev'] = grid_result.cv_results_['std_test_score']
 
 # print results to csv file
-grid_df.to_csv('clstm_5fold_grid_search_results.csv')
+grid_df.to_csv('test_output_jay.csv')
