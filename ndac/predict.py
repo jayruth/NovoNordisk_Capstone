@@ -4,6 +4,8 @@ from keras.models import Sequential
 from keras.layers import Dense
 from keras.layers import LSTM
 from keras.layers.embeddings import Embedding
+from keras.layers.convolutional import Conv1D
+from keras.layers.convolutional import MaxPooling1D
 from sklearn.model_selection import train_test_split
 
 
@@ -25,6 +27,8 @@ def train_clstm(x, y, test_fraction=0, embedding_len=4,
     model.add(Embedding(input_dim=vocab_size,
                         output_dim=embedding_len,
                         input_length=seq_len))
+    model.add(Conv1D(filters=128, kernel_size=3, padding='same', activation='selu'))
+    model.add(MaxPooling1D(pool_size=2))
     model.add(LSTM(100))
     model.add(Dense(1, activation='sigmoid'))
     model.compile(loss='binary_crossentropy',
