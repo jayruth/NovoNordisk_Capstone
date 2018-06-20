@@ -10,7 +10,8 @@ from sklearn.model_selection import train_test_split
 
 
 def train_clstm(x, y, test_fraction=0, embedding_len=4,
-                batch_size=100, epochs=5, verbose=1):
+                batch_size=100, epochs=5, verbose=1,
+                save_file=None):
     # fix random seed for reproducibility
     np.random.seed(7)
     # get embedding parameters from x matrix
@@ -42,5 +43,8 @@ def train_clstm(x, y, test_fraction=0, embedding_len=4,
         # Final evaluation of the model
         scores = model.evaluate(x_test, y_test, verbose=0)
         print("Accuracy: %.2f%%" % (scores[1]*100))
+
+    if save_file:
+        model.save(save_file)
 
     return model
