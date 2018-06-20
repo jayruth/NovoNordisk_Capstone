@@ -1,14 +1,16 @@
-import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
+from keras.preprocessing.text import Tokenizer
+from keras.preprocessing import sequence
 
-def quantile_classify(metric, sequence, high_cut=0.75, low_cut=0.25):
+
+def quantile_classify(metric, sequences, high_cut=0.75, low_cut=0.25):
     """This function creates a new dataframe containing the specified
     metric and sequence and computes a new column, 'class', based on
     the high and low cuts"""
 
-    dataframe = pd.concat([metric, sequence], axis=1)
+    dataframe = pd.concat([metric, sequences], axis=1)
     
     # convert high and low cut quantiles into values based on the values
     # of the metric
@@ -40,12 +42,12 @@ def quantile_classify(metric, sequence, high_cut=0.75, low_cut=0.25):
     return dataframe, hist
 
 
-def value_classify(metric, sequence, high_value, low_value):
+def value_classify(metric, sequences, high_value, low_value):
     """This function creates a new dataframe containing the specified
     metric and sequence and computes a new column, 'class', based on
     the high and low values specified for metric"""
 
-    dataframe = pd.concat([metric, sequence], axis=1)
+    dataframe = pd.concat([metric, sequences], axis=1)
 
     # make a histogram of the data to show the locations of the cut points
     hist = metric.hist(bins=100)
@@ -70,3 +72,23 @@ def value_classify(metric, sequence, high_value, low_value):
           "samples removed.")
 
     return dataframe, hist
+
+
+def encode_sequence(sequences, metric_class=None, max_length=0):
+    # define sequence documents
+    docs = list(sequences)
+    # create the tokenizer
+    t = Tokenizer()
+    # fit the tokenizer on the documents
+    t.fit_on_texts(docs)
+    # integer encode documents
+    x = t.texts_to_sequences(docs)
+    # pad or truncate sequences if max_length is nonzero
+    if max_length:
+        x = sequence.pad_sequences(x, maxlen=max_length)
+    # return x, y tuple of numpy arrays if class column is supplied
+    if metric_class:
+        y = metric_class.values
+        return x, y
+    # return numpy array of encoded sequences
+    return x
