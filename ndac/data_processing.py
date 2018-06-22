@@ -1,8 +1,10 @@
 import pandas as pd
+import numpy as np
 import matplotlib.pyplot as plt
 
 from keras.preprocessing.text import Tokenizer
 from keras.preprocessing import sequence
+from keras.utils import to_categorical
 
 
 def quantile_classify(metric, sequences, high_cut=0.75, low_cut=0.25):
@@ -117,6 +119,9 @@ def encode_sequence(sequences, classes, max_length=0,
     # pad or truncate sequences if max_length is nonzero
     if max_length:
         x = sequence.pad_sequences(x, maxlen=max_length)
+    # get y value array (matrix for multiclass)
     y = dataframe.loc[:, dataframe.columns[0]].values
+    if len(np.unique(y)) > 2:
+        y = to_categorical(y)
 
     return x, y
