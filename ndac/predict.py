@@ -9,9 +9,10 @@ from keras.layers.convolutional import MaxPooling1D
 from sklearn.model_selection import train_test_split
 
 
-def train_clstm(x, y, test_fraction=0, embedding_len=4,
+def train_clstm(x, y, test_fraction=0, embedding_length=10,
                 batch_size=100, epochs=5, verbose=1,
-                save_file=None):
+                save_file=None, cnn_filters=128, filter_length=3,
+                pool_size=2, lstm_nodes=100, lstm_drop=0.2):
     # fix random seed for reproducibility
     np.random.seed(7)
     # get embedding parameters from x matrix
@@ -26,15 +27,23 @@ def train_clstm(x, y, test_fraction=0, embedding_len=4,
     # create the model
     model = Sequential()
     model.add(Embedding(input_dim=vocab_size,
-                        output_dim=embedding_len,
+                        output_dim=embedding_length,
                         input_length=seq_len))
-    model.add(Conv1D(filters=128, kernel_size=3, padding='same', activation='selu'))
-    model.add(MaxPooling1D(pool_size=2))
-    model.add(LSTM(100))
-    model.add(Dense(1, activation='sigmoid'))
-    model.compile(loss='binary_crossentropy',
-                  optimizer='adam',
-                  metrics=['accuracy'])
+    model.add(Conv1D(filters=cnn_filters, kernel_size=filter_length,
+                     padding='same', activation='selu'))
+    model.add(MaxPooling1D(pool_size=pool_size))
+    model.add(LSTM(lstm_nodes, dropout=0.5, recurrent_dropout=lstm_drop))
+    if np.isscalar(y[0]):
+        model.add(Dense(1, activation='sigmoid'))
+        model.compile(loss='binary_crossentropy',
+                      optimizer='adam',
+                      metrics=['accuracy'])
+    else:
+        model.add(Dense(y.shape[1], activation='softmax'))
+        model.compile(loss='categorical_crossentropy',
+                      optimizer='adam',
+                      metrics=['accuracy'])
+
     print(model.summary())
     model.fit(x, y, epochs=epochs,
               batch_size=batch_size, verbose=verbose)
