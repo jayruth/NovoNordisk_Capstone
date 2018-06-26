@@ -16,7 +16,14 @@ def quantile_classify(metric, sequences, split_quantiles=0.5, drop_class=None):
     dataframe['class'] = 0
     print(len(metric), "samples input.")
     # make a histogram of the data to show the locations of the cut points
-    hist = dataframe.iloc[:, 0].hist(bins=100)
+    hist = plt.figure(figsize=(6, 4))
+    plt.hist(dataframe.iloc[:, 0], bins=100)
+    plt.grid(b=0) #turn off grid lines
+    plt.xlabel('Protein Expression Level', fontsize = 16)
+    plt.xticks(fontsize =12)
+    plt.ylabel('Counts', fontsize = 16)
+    plt.yticks(fontsize=12)
+    plt.tight_layout()
 
     # if a single number is supplied, make high and low classes
     if np.isscalar(split_quantiles):
@@ -70,7 +77,14 @@ def value_classify(metric, sequences, split_values, drop_class=None):
     dataframe['class'] = 0
     print(len(metric), "samples input.")
     # make a histogram of the data to show the locations of the cut points
-    hist = dataframe.iloc[:, 0].hist(bins=100)
+    hist = plt.figure(figsize=(6, 4))
+    plt.hist(dataframe.iloc[:, 0], bins=20, color = [220 / 255, 100 / 255, 20 / 255])
+    plt.grid(b=0) #turn off grid lines
+    plt.xlabel('Protein Solubility Class', fontsize = 16)
+    plt.xticks(fontsize =12)
+    plt.ylabel('Counts', fontsize = 16)
+    plt.yticks(fontsize=12)
+    plt.tight_layout()
 
     # if a single number is supplied, make high and low classes
     if np.isscalar(split_values):
