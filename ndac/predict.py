@@ -12,6 +12,9 @@ from keras.layers.convolutional import MaxPooling1D
 from sklearn.model_selection import train_test_split
 from keras.utils import to_categorical
 
+from sklearn.model_selection import GridSearchCV
+from keras.wrappers.scikit_learn import KerasClassifier
+
 
 def _clstm(categorical=False, vocab_size=False, embedding_length=10,
            seq_len=200, cnn_filters=128, filter_length=3,
@@ -162,3 +165,47 @@ def train_model(x, y, architecture='clstm', test_fraction=0,
         model.save(save_file)
 
     return model
+
+
+def cross_validate(x, y, architecture='clstm', save_file=None,
+                   skip_embedding=False, batch_size=100, epochs=5,
+                   verbose=10, k=3, params=None):
+    # fix random seed for reproducibility
+    np.random.seed(7)
+
+    params['vocab_size'] = [int(x.max() + 1)]
+
+    if skip_embedding:
+        params['embedding_length'] = [False]
+        x = to_categorical(x)
+
+    # get embedding parameters from x matrix
+    params['seq_len'] = [int(x.shape[1])]
+
+    if not np.isscalar(y[0]):
+        params['categorical'] = [y.shape[1]]
+
+    # print(model.summary())
+    if architecture == 'clstm':
+        model = KerasClassifier(build_fn=_clstm, batch_size=batch_size,
+                                epochs=epochs, verbose=verbose)
+    if architecture == 'lstm':
+        model = KerasClassifier(build_fn=_lstm, batch_size=batch_size,
+                                epochs=epochs, verbose=verbose)
+    if architecture == 'cnn':
+        model = KerasClassifier(build_fn=_cnn, batch_size=batch_size,
+                                epochs=epochs, verbose=verbose)
+
+    grid = GridSearchCV(estimator=model, param_grid=params, cv=k)  # , n_jobs=28)
+    grid_result = grid.fit(x, y)
+    # summarize results
+    print("Best: %f using %s" % (grid_result.best_score_, grid_result.best_params_))
+
+    if save_file:
+        grid_df = pd.DataFrame(grid_result.cv_results_['params'])
+        grid_df['means'] = grid_result.cv_results_['mean_test_score']
+        grid_df['stddev'] = grid_result.cv_results_['std_test_score']
+        # print results to csv file
+        grid_df.to_csv('test_output_jay.csv')
+
+    return
