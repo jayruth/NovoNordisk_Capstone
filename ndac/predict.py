@@ -7,12 +7,14 @@ from keras.layers.embeddings import Embedding
 from keras.layers.convolutional import Conv1D
 from keras.layers.convolutional import MaxPooling1D
 from sklearn.model_selection import train_test_split
+from keras.utils import to_categorical
 
 
 def train_clstm(x, y, test_fraction=0, embedding_length=10,
                 batch_size=100, epochs=5, verbose=1,
                 save_file=None, cnn_filters=128, filter_length=3,
-                pool_size=2, lstm_nodes=100, lstm_drop=0.2):
+                pool_size=2, lstm_nodes=100, lstm_drop=0.2,
+                dropout=0.5):
     # fix random seed for reproducibility
     np.random.seed(7)
     # get embedding parameters from x matrix
@@ -23,6 +25,9 @@ def train_clstm(x, y, test_fraction=0, embedding_length=10,
         # create test-train split
         x, x_test, y, y_test = train_test_split(x, y,
                                                 test_size=test_fraction)
+    # convert None embedding value to False to prevent error
+    if embedding_length == None:
+        embedding_length = False
 
     # create the model
     model = Sequential()
@@ -31,8 +36,18 @@ def train_clstm(x, y, test_fraction=0, embedding_length=10,
                         input_length=seq_len))
     model.add(Conv1D(filters=cnn_filters, kernel_size=filter_length,
                      padding='same', activation='selu'))
+    # if user requests no embedding, replace w/ CNN only
+    if not embedding_length:
+        model.pop()
+        model.pop()
+        x = to_categorical(x)
+        x_test = to_categorical(x_test, num_classes=x.shape[-1])
+        print(x.shape)
+        model.add(Conv1D(filters=cnn_filters, kernel_size=filter_length,
+                         input_shape=(x.shape[1], x.shape[2]),
+                         padding='same', activation='selu'))
     model.add(MaxPooling1D(pool_size=pool_size))
-    model.add(LSTM(lstm_nodes, dropout=0.5, recurrent_dropout=lstm_drop))
+    model.add(LSTM(lstm_nodes, dropout=dropout, recurrent_dropout=lstm_drop))
     if np.isscalar(y[0]):
         model.add(Dense(1, activation='sigmoid'))
         model.compile(loss='binary_crossentropy',
@@ -51,7 +66,7 @@ def train_clstm(x, y, test_fraction=0, embedding_length=10,
     if test_fraction:
         # Final evaluation of the model
         scores = model.evaluate(x_test, y_test, verbose=0)
-        print("Accuracy: %.2f%%" % (scores[1]*100))
+        print("Accuracy: %.2f%%" % (scores[1] * 100))
 
     if save_file:
         model.save(save_file)
