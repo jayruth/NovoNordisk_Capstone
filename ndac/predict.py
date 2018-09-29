@@ -16,8 +16,8 @@ from sklearn.model_selection import GridSearchCV
 from keras.wrappers.scikit_learn import KerasClassifier
 
 
-def _clstm(categorical=False, vocab_size=False, embedding_length=10,
-           seq_len=200, cnn_filters=128, filter_length=3,
+def _clstm(categorical=False, vocab_size=False, seq_len=200,
+           embedding_length=10, cnn_filters=128, filter_length=3,
            pool_size=2, nodes=100, lstm_drop=0.2, dropout=0.5):
     model = Sequential()
     model.add(Embedding(input_dim=vocab_size,
@@ -48,8 +48,9 @@ def _clstm(categorical=False, vocab_size=False, embedding_length=10,
     return model
 
 
-def _lstm(categorical=False, vocab_size=False, embedding_length=10,
-          seq_len=200, nodes=100, lstm_drop=0.2, dropout=0.5):
+def _lstm(categorical=False, vocab_size=False, seq_len=200,
+          embedding_length=10, nodes=100, lstm_drop=0.2,
+          dropout=0.5):
     model = Sequential()
     model.add(Embedding(input_dim=vocab_size,
                         output_dim=embedding_length,
@@ -75,8 +76,8 @@ def _lstm(categorical=False, vocab_size=False, embedding_length=10,
     return model
 
 
-def _cnn(categorical=False, vocab_size=None, embedding_length=10,
-         seq_len=200, cnn_filters=128, filter_length=3,
+def _cnn(categorical=False, vocab_size=None, seq_len=200,
+         embedding_length=10, cnn_filters=128, filter_length=3,
          pool_size=2, nodes=100, dropout=0.5):
     model = Sequential()
     model.add(Embedding(input_dim=vocab_size,
@@ -168,7 +169,7 @@ def train_model(x, y, architecture='clstm', test_fraction=0,
 
 
 def cross_validate(x, y, architecture='clstm', save_file=None,
-                   skip_embedding=False, batch_size=100, epochs=5,
+                   skip_embedding=False, batch_size=100, epochs=35,
                    verbose=10, k=3, params=None):
     # fix random seed for reproducibility
     np.random.seed(7)
