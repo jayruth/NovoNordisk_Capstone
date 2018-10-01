@@ -76,7 +76,7 @@ def _lstm(categorical=False, vocab_size=False, seq_len=200,
     return model
 
 
-def _cnn(categorical=False, vocab_size=None, seq_len=200,
+def _cnn(categorical=False, vocab_size=False, seq_len=150,
          embedding_length=10, cnn_filters=128, filter_length=3,
          pool_size=2, nodes=100, dropout=0.5):
     model = Sequential()
@@ -173,7 +173,6 @@ def cross_validate(x, y, architecture='clstm', save_file=None,
                    verbose=10, k=3, params=None):
     # fix random seed for reproducibility
     np.random.seed(7)
-
     params['vocab_size'] = [int(x.max() + 1)]
 
     if skip_embedding:
@@ -207,6 +206,6 @@ def cross_validate(x, y, architecture='clstm', save_file=None,
         grid_df['means'] = grid_result.cv_results_['mean_test_score']
         grid_df['stddev'] = grid_result.cv_results_['std_test_score']
         # print results to csv file
-        grid_df.to_csv('test_output_jay.csv')
+        grid_df.to_csv(save_file)
 
     return
