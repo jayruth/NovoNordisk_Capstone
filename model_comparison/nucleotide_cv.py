@@ -11,8 +11,12 @@ from ndac.predict import cross_validate
 
 
 #####################################################################
-################## NUCLEOTIDE SEQUENCE ##############################
+################## AMINO ACID SEQUENCE ##############################
 #####################################################################
+
+BATCH_SIZE = 100
+EPOCHS = 40
+K_FOLDS = 3
 
 # read and encode data, splitting top and bottom quartiles into classes
 data = pd.read_csv('../dataframes/DF_prest.csv', index_col=0)
@@ -32,17 +36,20 @@ nodes = [10, 50, 100]
 lstm_drop = [0.2]
 dropout = [0.5]
 
+# w/o embedding
 param_grid = dict(cnn_filters=cnn_filters, filter_length=filter_length,
                   pool_size=pool_size, nodes=nodes, lstm_drop=lstm_drop,
                   dropout=dropout, embedding_length=embedding_length)
-# w/o embedding
 cross_validate(X, y, architecture='clstm', save_file='clstm_no_embedding.csv', 
-               skip_embedding=True, batch_size=100, epochs=35, verbose=10,
-               k=3, params=param_grid) 
+               skip_embedding=True, batch_size=BATCH_SIZE, epochs=EPOCHS, 
+               verbose=10, k=K_FOLDS, params=param_grid) 
 # w/ embedding
+param_grid = dict(cnn_filters=cnn_filters, filter_length=filter_length,
+                  pool_size=pool_size, nodes=nodes, lstm_drop=lstm_drop,
+                  dropout=dropout, embedding_length=embedding_length)
 cross_validate(X, y, architecture='clstm', save_file='clstm.csv',
-               skip_embedding=False, batch_size=100, epochs=35, verbose=10,
-               k=3, params=param_grid)
+               skip_embedding=False, batch_size=BATCH_SIZE, epochs=EPOCHS,
+               verbose=10, k=K_FOLDS, params=param_grid)
 
 ######################
 ####### LSTM #########
@@ -53,16 +60,18 @@ nodes = [10, 50, 100]
 lstm_drop = [0.2]
 dropout = [0.5]
 
-param_grid = dict(nodes=nodes, lstm_drop=lstm_drop, dropout=dropout, 
-                  embedding_length=embedding_length)
 # w/o embedding
+param_grid = dict(nodes=nodes, lstm_drop=lstm_drop, dropout=dropout,
+                  embedding_length=embedding_length)
 cross_validate(X, y, architecture='lstm', save_file='lstm_no_embedding.csv',
-               skip_embedding=True, batch_size=100, epochs=35, verbose=10,
-               k=3, params=param_grid)
+               skip_embedding=True, batch_size=BATCH_SIZE, epochs=EPOCHS, 
+               verbose=10, k=K_FOLDS, params=param_grid)
 # w/ embedding
+param_grid = dict(nodes=nodes, lstm_drop=lstm_drop, dropout=dropout,
+                  embedding_length=embedding_length)
 cross_validate(X, y, architecture='lstm', save_file='lstm.csv',
-               skip_embedding=False, batch_size=100, epochs=35, verbose=10,
-               k=3, params=param_grid)
+               skip_embedding=False, batch_size=BATCH_SIZE, epochs=EPOCHS, 
+               verbose=10, k=K_FOLDS, params=param_grid)
 
 
 ######################
@@ -76,15 +85,18 @@ pool_size = [2, 4]
 nodes = [10, 50, 100]
 dropout = [0.5]
 
-param_grid = dict(cnn_filters=cnn_filters, filter_length=filter_length,
-                  pool_size=pool_size, nodes=nodes, dropout=dropout, 
-                  embedding_length=embedding_length)
 # w/o embedding
+param_grid = dict(cnn_filters=cnn_filters, filter_length=filter_length,
+                  pool_size=pool_size, nodes=nodes, dropout=dropout,
+                  embedding_length=embedding_length)
 cross_validate(X, y, architecture='cnn', save_file='cnn_no_embedding.csv',
-               skip_embedding=True, batch_size=100, epochs=35, verbose=10,
-               k=3, params=param_grid)
+               skip_embedding=True, batch_size=BATCH_SIZE, epochs=EPOCHS, 
+               verbose=10, k=K_FOLDS, params=param_grid)
 # w/ embedding
+param_grid = dict(cnn_filters=cnn_filters, filter_length=filter_length,
+                  pool_size=pool_size, nodes=nodes, dropout=dropout,
+                  embedding_length=embedding_length)
 cross_validate(X, y, architecture='cnn', save_file='cnn.csv',
-               skip_embedding=False, batch_size=100, epochs=35, verbose=10,
-               k=3, params=param_grid)
+               skip_embedding=False, batch_size=BATCH_SIZE, epochs=EPOCHS,
+               verbose=10, k=K_FOLDS, params=param_grid)
 
